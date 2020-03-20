@@ -9,6 +9,7 @@ connect('dvdrental')
 db.drop_collection("my_view2")
 db.drop_collection("my_view5")
 
+# returns for each film, all the actors who participated in it
 db.create_collection(
     'my_view2',
     viewOn='film__actor',
@@ -22,6 +23,7 @@ db.create_collection(
     ]
 )
 
+# return for each actor, a list of actors who co-starred a film with him
 db.create_collection(
     'my_view5',
     viewOn='actor',
@@ -57,7 +59,7 @@ db.create_collection(
     ]
 )
 
-
+# returns the degree of separation of each actor from Penelope Guiness
 query = db.my_view5.aggregate([
     {
         "$graphLookup": {
@@ -85,7 +87,7 @@ query = db.my_view5.aggregate([
             }
     },
     {
-        "$sort" : {"actor_id" : 1}
+        "$sort": {"actor_id": 1}
     }
 ])
 
@@ -96,26 +98,20 @@ output[0][0] = "actor_id"
 output[0][1] = "actor_name"
 output[0][2] = "degree of separation from Penelope Guiness"
 
-
-
 i = 1
 for x in query:
     actor = db.actor.find_one({"_id": x["actor_id"]})
     output[i][0] = actor["_id"]
-    output[i][1] = actor["first_name"] +  " " + actor["last_name"]
+    output[i][1] = actor["first_name"] + " " + actor["last_name"]
     output[i][2] = x["degree_of_separation"]
-    i = i+1
-
-
+    i = i + 1
 
 for i in range(0, h):
     for j in range(0, w):
         print(output[i][j], end=' ')
     print()
 
-
-
+# export the query result to csv
 with open("query5.csv", "w+") as my_csv:
     csvWriter = csv.writer(my_csv, delimiter=',')
     csvWriter.writerows(output)
-

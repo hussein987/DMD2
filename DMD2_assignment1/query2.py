@@ -10,6 +10,7 @@ db.drop_collection("my_view1")
 db.drop_collection("my_view2")
 db.drop_collection("my_view5")
 
+# project on the actor_id
 db.create_collection(
     'my_view1',
     viewOn='actor',
@@ -20,6 +21,7 @@ db.create_collection(
     ]
 )
 
+# returns for each film, all the actors who participated in it
 db.create_collection(
     'my_view2',
     viewOn='film__actor',
@@ -33,16 +35,12 @@ db.create_collection(
     ]
 )
 
+# returns a 200x200 table where each cell tells the number of
+# movies that a pair of actors have co-starred
 db.create_collection(
     'my_view5',
     viewOn='my_view1',
     pipeline=[
-        # {
-        #     "$project":
-        #         {
-        #             "_id": 1
-        #         }
-        # },
         {
             "$lookup":
                 {
@@ -97,7 +95,7 @@ for x in query:
 for i in range(1, 201):
     output[0][i] = output[i][0] = ("actor" + str(i))
 
-
+# export the query result to csv
 with open("query2.csv", "w+") as my_csv:
     csvWriter = csv.writer(my_csv, delimiter=',')
     csvWriter.writerows(output)
