@@ -107,16 +107,19 @@ db.create_collection(
             "$unwind": "$relation"
         },
         {
-            "$project":
+            "$group":
                 {
-                    "customer_id": 1,
-                    "categories": "$relation._id.category_id",
+                    "_id": "$customer_id",
+                    "categories": {"$addToSet": "$relation._id.category_id"},
                 }
+        },
+        {
+            "$unwind": "$categories"
         },
         {
             "$group":
                 {
-                    "_id": "$customer_id",
+                    "_id": "$_id",
                     "num_of_categories": {"$sum": 1}
                 }
         },
@@ -125,6 +128,9 @@ db.create_collection(
                 {
                     "num_of_categories": {"$gte": 2}
                 }
+        },
+        {
+            "$sort": {"_id": 1}
         }
     ]
 )
